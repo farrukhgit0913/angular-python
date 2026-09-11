@@ -1,0 +1,25 @@
+<div class="container">
+  <h1>Angular 22 + Python FastAPI</h1>
+
+  <p class="status">🚀 Angular UI is working</p>
+  <p class="status">🐍 Python API: http://127.0.0.1:8000</p>
+
+  @if (loading()) {
+    <p>Loading users...</p>
+  }
+
+  @if (error()) {
+    <p class="error">{{ error() }}</p>
+  }
+
+  @if (!loading() && !error()) {
+    <h2>Users</h2>
+
+    @for (user of users(); track user.id) {
+      <div class="user">
+        <h3>{{ user.name }}</h3>
+        <p>{{ user.email }}</p>
+      </div>
+    }
+  }
+</div>

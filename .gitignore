@@ -1,0 +1,7 @@
+python-rest-api/venv/
+__pycache__/
+*.pyc
+.DS_Store
+angular-fe/node_modules/
+angular-fe/.angular/
+angular-fe/dist/
