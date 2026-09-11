@@ -2,9 +2,10 @@
 
 A simple full-stack application with:
 
-* **Angular 22** frontend
-* **Python FastAPI** REST API
+* Angular 22 frontend
+* Python FastAPI REST API
 * REST API integration between Angular and Python
+* One-command development startup using `concurrently`
 
 ## Project Structure
 
@@ -13,73 +14,84 @@ angular-python/
 ├── angular-fe/          # Angular 22 frontend
 ├── python-be/           # Python FastAPI backend
 ├── .gitignore
+├── package.json         # Root scripts for running both applications
 └── README.md
 ```
 
 ## Requirements
 
-Make sure you have installed:
+Make sure the following are installed:
 
 * Node.js
 * npm
 * Python 3.9+
 * Angular CLI 22
 
-Check versions:
+Check your versions:
 
 ```bash
 node --version
 npm --version
 python3 --version
+ng version
 ```
 
-## 1. Run Python FastAPI API
+## Installation
 
-Open Terminal and go to the backend directory:
+Clone the repository and enter the project directory:
+
+```bash
+git clone <your-repository-url>
+cd angular-python
+```
+
+Install the root dependencies:
+
+```bash
+npm install
+```
+
+Install Angular dependencies:
+
+```bash
+cd angular-fe
+npm install
+cd ..
+```
+
+## Python FastAPI Setup
+
+Go to the backend directory:
 
 ```bash
 cd python-be
 ```
 
-### Create Virtual Environment
-
-If the virtual environment does not already exist:
+Create the Python virtual environment if it does not already exist:
 
 ```bash
 python3 -m venv venv
 ```
 
-### Activate Virtual Environment
-
-#### macOS / Linux
+Activate the virtual environment on macOS/Linux:
 
 ```bash
 source venv/bin/activate
 ```
 
-#### Windows
+On Windows:
 
 ```bash
 venv\Scripts\activate
 ```
 
-After activation, you should see `(venv)` in your terminal prompt.
-
-### Install Dependencies
-
-If `requirements.txt` exists:
-
-```bash
-pip install -r requirements.txt
-```
-
-If `requirements.txt` does not exist yet:
+Install the backend dependencies:
 
 ```bash
 pip install fastapi uvicorn
 ```
 
-### Start FastAPI
+Start FastAPI manually:
 
 ```bash
 python -m uvicorn main:app --reload
@@ -91,7 +103,11 @@ The API will be available at:
 http://127.0.0.1:8000
 ```
 
-### API URLs
+FastAPI Swagger documentation:
+
+```text
+http://127.0.0.1:8000/docs
+```
 
 Health check:
 
@@ -99,23 +115,27 @@ Health check:
 http://127.0.0.1:8000/health
 ```
 
-Users:
+Users API:
 
 ```text
 http://127.0.0.1:8000/users
 ```
 
-FastAPI Swagger documentation:
+Stop the server with:
 
 ```text
-http://127.0.0.1:8000/docs
+CTRL + C
 ```
 
-## 2. Run Angular Frontend
+Deactivate the virtual environment when finished:
 
-Open a **new Terminal window or tab**.
+```bash
+deactivate
+```
 
-Go to the Angular project:
+## Angular Setup
+
+Go to the Angular frontend:
 
 ```bash
 cd angular-fe
@@ -139,70 +159,110 @@ The Angular application will be available at:
 http://localhost:4200
 ```
 
-## 3. Run Both Projects
+The Angular `start` script should be:
 
-You need **two terminals**.
-
-### Terminal 1 — Python FastAPI
-
-```bash
-cd python-be
-source venv/bin/activate
-python -m uvicorn main:app --reload
+```json
+"start": "ng serve -o"
 ```
 
-### Terminal 2 — Angular
+The `-o` option automatically opens Angular in the default browser.
+
+## Run Angular + FastAPI Together
+
+The project is configured to run both applications with a single command.
+
+From the project root:
 
 ```bash
-cd angular-fe
+cd angular-python
 npm start
 ```
 
-Then open:
+The root `package.json` uses `concurrently` to start both services.
+
+### What happens
 
 ```text
+Angular
+    ↓
 http://localhost:4200
+
+FastAPI
+    ↓
+http://127.0.0.1:8000
+    ↓
+Swagger automatically opens
+http://127.0.0.1:8000/docs
 ```
 
-Angular will communicate with the Python API:
+You only need **one terminal**.
 
-```text
-http://127.0.0.1:8000/users
+The root `package.json` contains:
+
+```json
+"scripts": {
+  "start": "concurrently \"npm --prefix angular-fe start\" \"cd python-be && source venv/bin/activate && python -m uvicorn main:app --reload & sleep 2 && open http://127.0.0.1:8000/docs\""
+}
+```
+
+The root development dependency is:
+
+```json
+"devDependencies": {
+  "concurrently": "^10.0.5"
+}
 ```
 
 ## API Endpoints
 
-| Method | Endpoint      | Description    |
-| ------ | ------------- | -------------- |
-| GET    | `/`           | API status     |
-| GET    | `/health`     | Health check   |
-| GET    | `/users`      | Get all users  |
-| GET    | `/users/{id}` | Get user by ID |
-| POST   | `/users`      | Create user    |
-| PUT    | `/users/{id}` | Update user    |
-| DELETE | `/users/{id}` | Delete user    |
+| Method | Endpoint      | Description         |
+| ------ | ------------- | ------------------- |
+| GET    | `/`           | API welcome message |
+| GET    | `/health`     | Health check        |
+| GET    | `/users`      | Get all users       |
+| GET    | `/users/{id}` | Get a specific user |
+| POST   | `/users`      | Create a user       |
+| PUT    | `/users/{id}` | Update a user       |
+| DELETE | `/users/{id}` | Delete a user       |
 
 ## Angular → FastAPI
 
-The Angular application uses Angular's `HttpClient` to communicate with the FastAPI backend.
+The Angular application communicates with the FastAPI backend through HTTP requests.
 
 Example:
 
-```ts
-this.http.get<User[]>('http://127.0.0.1:8000/users')
+```typescript
+this.http.get<User[]>(
+  'http://127.0.0.1:8000/users'
+);
 ```
 
-FastAPI must allow requests from the Angular development server:
+FastAPI allows requests from the Angular development server:
 
 ```text
 http://localhost:4200
 ```
 
-CORS is configured in the FastAPI application.
+This is configured using FastAPI CORS middleware.
 
-## Development
+## Development Commands
 
-### Python API
+### Start everything
+
+From the root:
+
+```bash
+npm start
+```
+
+### Start Angular only
+
+```bash
+cd angular-fe
+npm start
+```
+
+### Start FastAPI only
 
 ```bash
 cd python-be
@@ -210,21 +270,65 @@ source venv/bin/activate
 python -m uvicorn main:app --reload
 ```
 
-### Angular
+### Stop everything
 
-```bash
-cd angular-fe
-npm start
+Press:
+
+```text
+CTRL + C
 ```
 
-Both applications support live reload during development.
+## Useful URLs
 
-## Deactivate Python Virtual Environment
+| Service      | URL                          |
+| ------------ | ---------------------------- |
+| Angular      | http://localhost:4200        |
+| FastAPI      | http://127.0.0.1:8000        |
+| Swagger UI   | http://127.0.0.1:8000/docs   |
+| ReDoc        | http://127.0.0.1:8000/redoc  |
+| Health Check | http://127.0.0.1:8000/health |
+| Users API    | http://127.0.0.1:8000/users  |
 
-When you are finished working with the Python backend:
+## Notes
+
+* The Python virtual environment is located at `python-be/venv/`.
+* `venv/` is ignored by Git.
+* Angular `node_modules/`, `.angular/`, and `dist/` are ignored by Git.
+* Both applications can be developed independently or started together.
+* `concurrently` allows Angular and FastAPI to run from a single terminal.
+* FastAPI Swagger opens automatically when using the root `npm start` command.
+* Angular opens automatically because its `start` script uses `ng serve -o`.
+
+## Stop the Python Virtual Environment
+
+If you manually activated the Python virtual environment:
 
 ```bash
 deactivate
 ```
 
-This returns your terminal to the normal system Python environment.
+## Git
+
+Check the current Git status:
+
+```bash
+git status
+```
+
+Add changes:
+
+```bash
+git add .
+```
+
+Commit:
+
+```bash
+git commit -m "Update README and project setup"
+```
+
+Push:
+
+```bash
+git push origin main
+```
