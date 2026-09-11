@@ -1,0 +1,25 @@
+{
+  "name": "angular-python",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "concurrently \"npm --prefix angular-fe start\" \"cd python-be && source venv/bin/activate && python -m uvicorn main:app --reload & sleep 2 && open http://127.0.0.1:8000/docs\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farrukhgit0913/angular-python.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/farrukhgit0913/angular-python/issues"
+  },
+  "homepage": "https://github.com/farrukhgit0913/angular-python#readme",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}
