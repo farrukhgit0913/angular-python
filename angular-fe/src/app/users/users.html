@@ -1,0 +1,157 @@
+<div class="container">
+
+  <header class="page-header">
+    <div>
+      <h1>Users</h1>
+      <p>Manage your application users</p>
+    </div>
+
+    <span class="user-count">
+      {{ users().length }} Users
+    </span>
+  </header>
+
+  @if (error()) {
+    <div class="error">
+      {{ error() }}
+    </div>
+  }
+
+  <section class="form-card">
+
+    <div class="card-header">
+      <div>
+        <h2>
+          {{ editingId() ? 'Edit User' : 'Create User' }}
+        </h2>
+        <p>
+          {{ editingId()
+            ? 'Update the user information below'
+            : 'Add a new user to your application'
+          }}
+        </p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+
+      <div class="field">
+        <label for="name">Name</label>
+        <input
+          id="name"
+          type="text"
+          placeholder="Enter name"
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+        />
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          placeholder="Enter email"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+        />
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="saveUser()"
+        [disabled]="loading()"
+      >
+        {{ loading() ? 'Saving...' : (editingId() ? 'Update User' : 'Create User') }}
+      </button>
+
+      @if (editingId()) {
+        <button
+          class="btn btn-secondary"
+          type="button"
+          (click)="clearForm()"
+        >
+          Cancel
+        </button>
+      }
+
+    </div>
+
+  </section>
+
+
+  <section class="users-section">
+
+    <div class="section-header">
+      <div>
+        <h2>All Users</h2>
+        <p>View and manage registered users</p>
+      </div>
+    </div>
+
+    @if (loading() && users().length === 0) {
+      <div class="loading">
+        Loading users...
+      </div>
+    }
+
+    @if (!loading() && users().length === 0) {
+      <div class="empty-state">
+        <h3>No users yet</h3>
+        <p>Create your first user using the form above.</p>
+      </div>
+    }
+
+    <div class="user-list">
+
+      @for (user of users(); track user.id) {
+
+        <div class="user-card">
+
+          <div class="user-info">
+
+            <div class="avatar">
+              {{ user.name.charAt(0).toUpperCase() }}
+            </div>
+
+            <div>
+              <h3>{{ user.name }}</h3>
+              <p>{{ user.email }}</p>
+            </div>
+
+          </div>
+
+          <div class="user-actions">
+
+            <button
+              class="btn btn-edit"
+              type="button"
+              (click)="editUser(user)"
+            >
+              Edit
+            </button>
+
+            <button
+              class="btn btn-delete"
+              type="button"
+              (click)="deleteUser(user)"
+            >
+              Delete
+            </button>
+
+          </div>
+
+        </div>
+
+      }
+
+    </div>
+
+  </section>
+
+</div>
